@@ -65,9 +65,12 @@ def onkeypress(event, key):
         
     
 def onclick(event, hist, xax, yax, profile_index, p_axes):
-    ''' Get an event, an history file, the x and y axis (for the
+    ''' Get an right click, an history file, the x and y axis (for the
     history plot), the profile_index array and the profile axes.
     Add the profile to the current profile plot.'''
+
+    if not event.button == 3:
+        return
     
     # try to find the profile that is the closest to that position
     x, y = event.xdata, event.ydata
@@ -215,7 +218,7 @@ if __name__ == "__main__":
     p = data(os.path.join(directory, "profile1.data"), get_header=False)
     print()
     print("#"*50)
-    print("# Axis available for history plot")
+    print("# Axis available for profile(s) plot")
     print()
     p_axes = ask_for_columns(p, "mass", "omega")
     
