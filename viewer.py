@@ -6,6 +6,10 @@ import numpy as np
 import pandas as pd
 import os
 
+# global variables
+current_profile_figure = 2
+current_history_figure = 1
+profile_figure_list = [2]
 
 def data(f, get_header = True):
     ''' Read the file "f" and interpret it as a profile and return the data
@@ -17,17 +21,46 @@ def data(f, get_header = True):
     else:
         return d
 
+def init_figure(num):
+    fig = plt.figure(num)
+    ax  = fig.add_subplot(111)
+    ax.set_xlabel(p_axes[0])
+    ax.set_ylabel(p_axes[1])
+    ax.legend()
+    ax.grid()
+
 def onkeypress(event, key):
+    global current_profile_figure, profile_figure_list
     key[0] = event.key
     if event.key == "ctrl+b":
-        plt.close(2)
+        plt.close()
         print("Reset figure 2")
-        fig2 = plt.figure(2)
-        ax2  = fig2.add_subplot(111)
-        ax2.set_xlabel(p_axes[0])
-        ax2.set_ylabel(p_axes[1])
-        ax2.legend()
-        ax2.grid()
+        init_figure(current_profile_figure)
+        
+    elif event.key == "ctrl+n":
+        # if this figure is the last one, add a new one
+        if current_profile_figure == profile_figure_list[-1]:
+            # add the figure to the list
+            profile_figure_list.append(current_profile_figure+1)
+            # initialize the figure
+            init_figure(current_profile_figure + 1)
+
+        # switch to the next figure
+        current_profile_figure += 1
+        
+        print("Jumping to figure %d" % current_profile_figure)
+        
+    elif event.key == "ctrl+p":
+        # if we are at the first one, jump to the last one
+        if current_profile_figure == profile_figure_list[0]:
+            current_profile_figure = profile_figure_list[-1] + 1
+            
+        # switch to the previous figure
+        current_profile_figure -= 1
+    
+        print("Jumping to figure %d" % current_profile_figure)
+            
+        
         
     
 def onclick(event, hist, key, xax, yax, profile_index, p_axes):
@@ -74,7 +107,7 @@ def onclick(event, hist, key, xax, yax, profile_index, p_axes):
     p_axes = ("mass", "omega")
     
     # plot the profile
-    fig2 = plt.figure(2)
+    fig2 = plt.figure(current_profile_figure)
     if key[0] == "control":
         print("Clearing figure")
         fig2.clear()
@@ -198,7 +231,7 @@ if __name__ == "__main__":
     #######################################
     # profile
     #######################################
-    fig2 = plt.figure(2)
+    fig2 = plt.figure(current_profile_figure)
     ax2  = fig2.add_subplot(111)
     ax2.set_xlabel(p_axes[0])
     ax2.set_ylabel(p_axes[1])
