@@ -22,6 +22,7 @@ def data(f, get_header = True):
         return d
 
 def init_figure(num):
+    ''' Initialize the figure `num`.'''
     fig = plt.figure(num)
     ax  = fig.add_subplot(111)
     ax.set_xlabel(p_axes[0])
@@ -30,6 +31,7 @@ def init_figure(num):
     ax.grid()
 
 def onkeypress(event, key):
+    ''' Handle the mouse events sent to the history figure.'''
     global current_profile_figure, profile_figure_list
     key[0] = event.key
     if event.key == "ctrl+b":
@@ -58,12 +60,15 @@ def onkeypress(event, key):
         # switch to the previous figure
         current_profile_figure -= 1
     
-        print("Jumping to figure %d" % current_profile_figure)
-            
+        print("Jumping to figure %d" % current_profile_figure)         
         
         
     
-def onclick(event, hist, key, xax, yax, profile_index, p_axes):
+def onclick(event, hist, xax, yax, profile_index, p_axes):
+    ''' Get an event, an history file, the x and y axis (for the
+    history plot), the profile_index array and the profile axes.
+    Add the profile to the current profile plot.'''
+    
     # try to find the profile that is the closest to that position
     x, y = event.xdata, event.ydata
 
@@ -126,13 +131,14 @@ def ask_for_columns(data, x="", y=""):
 
     xform = x
     yform = y
+    # xform (resp. yform) are either "" or [somevalue]
     if x != "":
         xform = "[" + x + "]"
     if y != "":
         yform = "[" + y + "]"
-        
+    
     xaxis = input("\tx-axis %s? " % xform)
-    # if no answer but there is a default answer
+    # if no answer but there is a default answer (in "x")
     if not xaxis and x:
         xaxis = x
         
@@ -168,16 +174,16 @@ if __name__ == "__main__":
     #######################################
     # work directory
     #######################################
-    directory = os.path.expanduser(input("Please pick a directory [/home/ccc/hyades/pfs/simulations/M=1.3_thermo/C=50/LOGS_RGB]: "))
+    def_dir = "/home/ccc/hyades/pfs/simulations/M=1.3_thermo/C=50/LOGS_RGB"
+    directory = os.path.expanduser(input("Please pick a directory [%s]: " % def_dir))
     if not directory:
-        directory = "/home/ccc/hyades/pfs/simulations/M=1.3_thermo/C=50/LOGS_RGB"
+        directory = def_dir
     while not os.path.isdir(directory):
         print("%s is not a directory." % directory)
         directory = os.path.expanduser(input("Please pick a directory : "))
 
     # list the directory
     ls = os.listdir(directory)
-    assert("history.data" in ls)
 
     #######################################
     # history profile : reading
@@ -217,7 +223,7 @@ if __name__ == "__main__":
     # create the lambda function so that onclick and onkeypress have
     # access to local vars :D
     key = [None]
-    _onclick = lambda event: onclick(event, hist, key,
+    _onclick = lambda event: onclick(event, hist,
                                      xaxis, yaxis, profile_index,
                                      p_axes)
     _onkeypress = lambda event: onkeypress(event, key)
