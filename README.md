@@ -15,3 +15,10 @@ The other one is the possibility to use keyboad shortcuts.
    * `Ctrl+b` will delete the profile plot.
    * `Ctrl+n` will create a new figure or move to the next one on the stack (if any)
    * `Ctrl+p` will move to the previous figure on the stack (if any)
+
+
+TODO
+====
+
+  * improve performances (caching, preloading, efficient indexing)
+  * possibility to redefine the axes of a plot (with keystroke for example)
