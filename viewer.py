@@ -110,9 +110,6 @@ def onclick(event, hist, xax, yax, profile_index, p_axes):
     p, h = data(os.path.join(directory, "profile%d.data" % profile_number))
 
     print("... loaded")
-
-    # get columns to plot
-    p_axes = ("mass", "omega")
     
     # plot the profile
     fig2 = plt.figure(current_profile_figure)
@@ -123,49 +120,54 @@ def onclick(event, hist, xax, yax, profile_index, p_axes):
     ax2 = fig2.add_subplot(111)
 
     ax2.plot(p.get(p_axes[0]), p.get(p_axes[1]),
-             label="$t= %e, \mathrm{model} = %d$" % (h.star_age, h.model_number))
+             label="$t= %e, \mathrm{profile} = %d$" % (h.star_age, h.model_number))
     ax2.set_xlabel(p_axes[0])
     ax2.set_ylabel(p_axes[1])
     ax2.legend()
     fig2.show()
 
-def ask_for_columns(data, x="", y=""):
-    print("".join([ col + ", " for col in data.columns]))
+def ask_for_columns(data, xdef="", ydef=""):
+    # get the columns as a list and sort them
+    col_list = data.columns.tolist()
+    col_list.sort()
+    print("".join([ col + "\t" for col in col_list]))
 
-    xform = x
-    yform = y
-    # xform (resp. yform) are either "" or [somevalue]
-    if x != "":
-        xform = "[" + x + "]"
-    if y != "":
-        yform = "[" + y + "]"
+    xform = xdef
+    yform = ydef
+    # xform (resp. yform) are either '""' or '[x]'
+    if xdef != "":
+        xform = "[" + xdef + "]"
+    if ydef != "":
+        yform = "[" + ydef + "]"
     
     xaxis = input("\tx-axis %s? " % xform)
     # if no answer but there is a default answer (in "x")
-    if not xaxis and x:
-        xaxis = x
-        
+    if not xaxis and xdef:
+        xaxis = xdef
+
+    if xaxis == "pass":
+        return False
     while xaxis not in data.columns:
         if xaxis == "?" :
             print("".join([ col + ", " for col in data.columns]))
         xaxis = input("\tx-axis (? for list)%s? " % xform)
         # if no answer but there is a default answer
-        if not xaxis and x:
-            xaxis = x
+        if not xaxis and xdef:
+            xaxis = xdef
 
     yaxis = input("\ty-axis %s? " % yform)
     # if no answer but there is a default answer
-    if not yaxis and y:
-        yaxis = y
+    if not yaxis and ydef:
+        yaxis = ydef
         
     while yaxis not in data.columns:
         if yaxis == "?":
             print("".join([ col + ", " for col in data.columns]))
         yaxis = input("\ty-axis (? for list)%s? " %yform)
         # if no answer but there is a default answer
-        if not yaxis and y:
-            yaxis = y        
-
+        if not yaxis and ydef:
+            yaxis = ydef
+            
     return xaxis, yaxis
 
 if __name__ == "__main__":
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     #######################################
     # work directory
     #######################################
-    def_dir = "/home/ccc/hyades/pfs/simulations/M=1.3_thermo/C=50/LOGS_RGB"
+    def_dir = "/home/ccadiou/pfs/simulations/M=1.3_thermo/C=50/LOGS_RGB"
     directory = os.path.expanduser(input("Please pick a directory [%s]: " % def_dir))
     if not directory:
         directory = def_dir
@@ -215,14 +217,14 @@ if __name__ == "__main__":
     #######################################
     # profile: axes to plot
     #######################################
-    p = data(os.path.join(directory, "profile1.data"), get_header=False)
     print()
     print("#"*50)
     print("# Axis available for profile(s) plot")
+    print("# write 'pass' if you don't want any profile plot")
     print()
+    p = data(os.path.join(directory, "profile1.data"), get_header=False)
     p_axes = ask_for_columns(p, "mass", "omega")
     
-
     # create the lambda function so that onclick and onkeypress have
     # access to local vars :D
     key = [None]
@@ -236,16 +238,17 @@ if __name__ == "__main__":
     ##################################################
     # set interactive mode
     plt.ion()
-    
-    #######################################
-    # profile
-    #######################################
-    fig2 = plt.figure(current_profile_figure)
-    ax2  = fig2.add_subplot(111)
-    ax2.set_xlabel(p_axes[0])
-    ax2.set_ylabel(p_axes[1])
-    ax2.legend()
-    ax2.grid()
+
+    if p_axes: # If we gave axes (ie if we didn't pass)
+        #######################################
+        # profile
+        #######################################
+        fig2 = plt.figure(current_profile_figure)
+        ax2  = fig2.add_subplot(111)
+        ax2.set_xlabel(p_axes[0])
+        ax2.set_ylabel(p_axes[1])
+        ax2.legend()
+        ax2.grid()
     
     #######################################
     # history profile
